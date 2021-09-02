@@ -8,43 +8,61 @@ import { Jimage } from 'react-jimp';
 const App = () => {
   return (
     <main className="main">
-      <Jimage
-        src={Image}
-        color={[
-          {apply: 'red', params: [0]},
-          {apply: 'blue', params: [0]},
-          {apply: 'green', params: [0]},
-        ]}
-      />
       <SliderRGB />
     </main>
   );
 }
 
-
-
 const SliderRGB = () => {
-  const [red, setRed] = useState(255);
-  const [green, setGreen] = useState(255);
-  const [blue, setBlue] = useState(255);
 
-  const handlered = (event, newValue) => {
-    setRed(newValue);
-  }
-  const handlegreen = (event, newValue) => {
-    setGreen(newValue);
-  }
-  const handleblue = (event, newValue) => {
-    setBlue(newValue);
-  }
+  const rgbArr = [
+    { "color": "red", "value": 0 },
+    { "color": "green", "value": 0 },
+    { "color": "blue", "value": 0 }
+  ];
 
+  // const [red, setRed] = useState(255);
+  // const [green, setGreen] = useState(255);
+  // const [blue, setBlue] = useState(255);
+  const [rgb, setRgb] = useState(rgbArr);
+
+  function handleRGB(event, newValue) {
+    const index = parseInt(event.target.ariaLabel);
+
+    setRgb([
+      { "color": "red", "value": index === 0 ? newValue : rgb[0].value },
+      { "color": "green", "value": index === 1 ? newValue : rgb[1].value },
+      { "color": "blue", "value": index === 2 ? newValue : rgb[2].value }
+    ]);
+
+  }
 
   return (
-    <Container maxWidth="sm">
-      <MySlider color="red" value={red} onChange={handlered} />
+    <div>
+      <Jimage
+        src={Image}
+        color={[
+          { apply: 'red', params: [rgb[0].value] },
+          { apply: 'green', params: [rgb[1].value] },
+          { apply: 'blue', params: [rgb[2].value] },
+        ]}
+      />
+      <Container maxWidth="sm">
+        {rgb.map((v, index) => (
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs>
+              <PrettoSlider aria-label={`${index}`} color={v.color} max={255} valueLabelDisplay="auto" defaultValue={0} onChange={handleRGB} />
+            </Grid>
+            <Grid item >
+              <Typography>{`${v.value} - ${index}`}</Typography>
+            </Grid>
+          </Grid>
+        ))}
+        {/* <MySlider color="red" value={red} onChange={handlered} />
       <MySlider color="green" value={green} onChange={handlegreen} />
-      <MySlider color="blue" value={blue} onChange={handleblue} />
-    </Container>
+      <MySlider color="blue" value={blue} onChange={handleblue} /> */}
+      </Container>
+    </div>
   )
 }
 
@@ -61,7 +79,6 @@ const MySlider = (props) => {
 
   );
 }
-
 
 const PrettoSlider = withStyles({
   root: props => ({
