@@ -7,9 +7,7 @@ import { Jimage } from 'react-jimp';
 
 const App = () => {
   return (
-    <SliderRGB>
-
-    </SliderRGB>
+    <SliderRGB />
   );
 }
 
@@ -27,17 +25,18 @@ const SliderRGB = () => {
   const [rgb, setRgb] = useState(rgbArr);
 
   function handleRGB(event, newValue) {
-    const index = parseInt(event.target.ariaLabel);
+    const index = event.currentTarget.id;
     console.log(`Index: ${event.target.ariaLabel}`);
+    console.log(`Red: ${rgb[0].value}\nGreen: ${rgb[1].value}\nBlue: ${rgb[2].value}`);
     setRgb([
-      { "color": "red", "value": index === 0 ? newValue : rgb[0].value },
-      { "color": "green", "value": index === 1 ? newValue : rgb[1].value },
-      { "color": "blue", "value": index === 2 ? newValue : rgb[2].value }
+      { "color": "red", "value": index == "rgb[0]" ? newValue : rgb[0].value },
+      { "color": "green", "value": index == "rgb[1]" ? newValue : rgb[1].value },
+      { "color": "blue", "value": index == "rgb[2]" ? newValue : rgb[2].value }
     ]);
+
     // console.log(`Red: ${rgb[0].value}\nGreen: ${rgb[1].value}\nBlue: ${rgb[2].value}`);
 
   }
-
   return (
     <main className="main">
       <Jimage
@@ -52,18 +51,17 @@ const SliderRGB = () => {
         {rgb.map((v, index) => (
           <Grid container spacing={2} alignItems="center">
             <Grid item xs>
-              <PrettoSlider id={`${index}`} aria-label={`${index}`} color={v.color} max={255} 
-                valueLabelDisplay="auto" defaultValue={0} onChangeCommitted={handleRGB} />
+              <PrettoSlider id={`rgb[${index}]`} aria-label={`${index}`} color={v.color} max={255}
+                valueLabelDisplay="auto" defaultValue={0} onChange={handleRGB} />
             </Grid>
             <Grid item >
-              <Typography>{`${v.value} - ${index}`}</Typography>
+              <Typography>{`${v.value}`}</Typography>
             </Grid>
           </Grid>
         ))}
       </Container>
-
-    </main >
-  )
+    </main>
+  );
 }
 
 const PrettoSlider = withStyles({
@@ -91,7 +89,7 @@ const PrettoSlider = withStyles({
     borderRadius: 4,
   },
   rail: {
-    maxWidth: 508,
+    width: 508,
     height: 8,
     borderRadius: 4,
   },
