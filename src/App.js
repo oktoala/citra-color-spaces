@@ -7,9 +7,9 @@ import { Jimage } from 'react-jimp';
 
 const App = () => {
   return (
-    <main className="main">
-      <SliderRGB />
-    </main>
+    <SliderRGB>
+
+    </SliderRGB>
   );
 }
 
@@ -28,56 +28,42 @@ const SliderRGB = () => {
 
   function handleRGB(event, newValue) {
     const index = parseInt(event.target.ariaLabel);
-
+    console.log(`Index: ${event.target.ariaLabel}`);
     setRgb([
       { "color": "red", "value": index === 0 ? newValue : rgb[0].value },
       { "color": "green", "value": index === 1 ? newValue : rgb[1].value },
       { "color": "blue", "value": index === 2 ? newValue : rgb[2].value }
     ]);
+    // console.log(`Red: ${rgb[0].value}\nGreen: ${rgb[1].value}\nBlue: ${rgb[2].value}`);
 
   }
 
   return (
-    <div>
+    <main className="main">
       <Jimage
         src={Image}
         color={[
-          { apply: 'red', params: [rgb[0].value] },
-          { apply: 'green', params: [rgb[1].value] },
-          { apply: 'blue', params: [rgb[2].value] },
+          { apply: "red", params: [rgb[0].value] },
+          { apply: "green", params: [rgb[1].value] },
+          { apply: "blue", params: [rgb[2].value] },
         ]}
       />
       <Container maxWidth="sm">
         {rgb.map((v, index) => (
           <Grid container spacing={2} alignItems="center">
             <Grid item xs>
-              <PrettoSlider aria-label={`${index}`} color={v.color} max={255} valueLabelDisplay="auto" defaultValue={0} onChange={handleRGB} />
+              <PrettoSlider id={`${index}`} aria-label={`${index}`} color={v.color} max={255} 
+                valueLabelDisplay="auto" defaultValue={0} onChangeCommitted={handleRGB} />
             </Grid>
             <Grid item >
               <Typography>{`${v.value} - ${index}`}</Typography>
             </Grid>
           </Grid>
         ))}
-        {/* <MySlider color="red" value={red} onChange={handlered} />
-      <MySlider color="green" value={green} onChange={handlegreen} />
-      <MySlider color="blue" value={blue} onChange={handleblue} /> */}
       </Container>
-    </div>
+
+    </main >
   )
-}
-
-const MySlider = (props) => {
-  return (
-    <Grid container spacing={2} alignItems="center">
-      <Grid item xs>
-        <PrettoSlider color={props.color} max="255" valueLabelDisplay="auto" aria-label="pretto slider" defaultValue={255} onChange={props.onChange} />
-      </Grid>
-      <Grid item >
-        <Typography>{props.value}</Typography>
-      </Grid>
-    </Grid>
-
-  );
 }
 
 const PrettoSlider = withStyles({
