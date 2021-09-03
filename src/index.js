@@ -5,94 +5,13 @@ import { Container, Slider, Grid, Typography, Paper, Tabs, Tab, Button } from '@
 import { withStyles } from '@material-ui/core/styles';
 import { useState } from 'react';
 import { Jimage } from 'react-jimp';
+import { rgbToHSL, hslToRgb, cmykToRgb, rgbToCmyk } from './converter';
 
 const App = () => {
   return (
     <Main ></Main>
   );
 }
-
-
-
-// Function to convert
-function rgbToHSL(r, g, b) {
-  // Make r, g, and b fractions of 1
-  r /= 255;
-  g /= 255;
-  b /= 255;
-
-  // Find greatest and smallest channel values
-  let cmin = Math.min(r, g, b),
-    cmax = Math.max(r, g, b),
-    delta = cmax - cmin,
-    h = 0,
-    s = 0,
-    l = 0;
-
-  // Calculate hue
-  // No difference
-  if (delta === 0)
-    h = 0;
-  // Red is max
-  else if (cmax === r)
-    h = ((g - b) / delta) % 6;
-  // Green is max
-  else if (cmax === g)
-    h = (b - r) / delta + 2;
-  // Blue is max
-  else
-    h = (r - g) / delta + 4;
-
-  h = Math.round(h * 60);
-
-  // Make negative hues positive behind 360°
-  if (h < 0)
-    h += 360;
-
-  // Calculate lightness
-  l = (cmax + cmin) / 2;
-
-  // Calculate saturation
-  s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
-
-  // Multiply l and s by 100
-  s = +(s * 100).toFixed(1);
-  l = +(l * 100).toFixed(1);
-
-  console.log(`h: ${h}, s: ${s}, l: ${l}`);
-
-  return { hue: h, saturate: s, lightness: l };
-}
-
-function hslToRgb(h, s, l) {
-  var r, g, b;
-
-  h /= 360;
-  s /= 100;
-  l /= 100;
-
-  if (s === 0) {
-    r = g = b = l; // achromatic
-  } else {
-    var hue2rgb = function hue2rgb(p, q, t) {
-      if (t < 0) t += 1;
-      if (t > 1) t -= 1;
-      if (t < 1 / 6) return p + (q - p) * 6 * t;
-      if (t < 1 / 2) return q;
-      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-      return p;
-    }
-
-    var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-    var p = 2 * l - q;
-    r = hue2rgb(p, q, h + 1 / 3);
-    g = hue2rgb(p, q, h);
-    b = hue2rgb(p, q, h - 1 / 3);
-  }
-
-  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
-}
-
 const Main = () => {
 
   // Array of Color Spaces
@@ -106,10 +25,17 @@ const Main = () => {
     { "color": "saturate", "value": 0 },
     { "color": "lighten", "value": 0 }
   ];
+  const cmykArr = [
+    { "color": "cyan", "value": 0 },
+    { "color": "magenta", "value": 0 },
+    { "color": "yellow", "value": 0 },
+    { "color": "black", "value": 0 }
+  ];
 
   // Variable for state management
   const [rgb, setRgb] = useState(rgbArr);
   const [hsl, setHsl] = useState(hslArr);
+  const [cmyk, setCmyk] = useState(cmykArr);
   const [greyScale, setGreyScale] = useState(100);
   const [tabs, setTabs] = useState(0);
 
@@ -127,11 +53,16 @@ const Main = () => {
     hsl[0].value = rgb2hsl.hue;
     hsl[1].value = parseInt(rgb2hsl.saturate);
     hsl[2].value = parseInt(rgb2hsl.lightness);
+
+    const rgb2cmyk = rgbToCmyk(rgb[0].value, rgb[1].value, rgb[2].value);
+    cmyk[0].value = rgb2cmyk.c;
+    cmyk[1].value = rgb2cmyk.m;
+    cmyk[2].value = rgb2cmyk.y;
+    cmyk[3].value = rgb2cmyk.k;
   }
 
   function handleHSL(event, newValue) {
     const index = event.currentTarget.id !== undefined ? event.currentTarget.id : event.target.ariaLabel;
-
     setHsl([
       { "color": "hue", "value": index === "hsl[0]" ? newValue : hsl[0].value },
       { "color": "saturate", "value": index === "hsl[1]" ? newValue : hsl[1].value },
@@ -141,6 +72,22 @@ const Main = () => {
     rgb[0].value = hsl2rgb[0];
     rgb[1].value = hsl2rgb[1];
     rgb[2].value = hsl2rgb[2];
+    setRgb(rgb);
+  }
+
+  function handleCMYK(event, newValue) {
+    const index = event.currentTarget.id !== undefined ? event.currentTarget.id : event.target.ariaLabel;
+    setCmyk([
+      { "color": "cyan", "value": index === "cmyk[0]" ? newValue : cmyk[0].value },
+      { "color": "magenta", "value": index === "cmyk[1]" ? newValue : cmyk[1].value },
+      { "color": "yellow", "value": index === "cmyk[2]" ? newValue : cmyk[2].value },
+      { "color": "black", "value": index === "cmyk[3]" ? newValue : cmyk[3].value }
+    ]);
+    const cmyk2rgb = cmykToRgb(cmyk[0].value, cmyk[1].value, cmyk[2].value, cmyk[3].value);
+    rgb[0].value = cmyk2rgb.r;
+    rgb[1].value = cmyk2rgb.g;
+    rgb[2].value = cmyk2rgb.b;
+    setRgb(rgb);
   }
 
   function handleGreyScale(event, newValue) {
@@ -155,14 +102,10 @@ const Main = () => {
     <main className="main">
       <Jimage
         src={Image}
-        color={tabs === 0 ? [
+        color={tabs === 0 || tabs === 1 || tabs === 3 ? [
           { apply: "red", params: [rgb[0].value] },
           { apply: "green", params: [rgb[1].value] },
           { apply: "blue", params: [rgb[2].value] }
-        ] : tabs === 1 ? [
-          { apply: "hue", params: [hsl[0].value] },
-          { apply: "saturate", params: [hsl[1].value] },
-          { apply: "lighten", params: [hsl[2].value] },
         ] :
           [{ apply: "desaturate", params: [100] },]
         }
@@ -176,8 +119,10 @@ const Main = () => {
             <Tab label="RGB" />
             <Tab label="HSL" />
             <Tab label="Grayscale" />
+            <Tab label="CMYK" />
           </Tabs>
         </Paper>
+        {/* RGB */}
         <ColorContainer display={tabs === 0 ? `block` : "none"} className="rgb-container">
           {rgb.map((v, index) => (
             <Grid container spacing={2} alignItems="center">
@@ -192,6 +137,7 @@ const Main = () => {
           ))}
           <Button container variant="contained" onClick={() => setRgb(rgbArr)} color="default">Reset RGB</Button>
         </ColorContainer>
+        {/* HSL */}
         <ColorContainer display={tabs === 1 ? `block` : `none`}>
           {hsl.map((v, index) => (
             <Grid container spacing={2} alignItems="center">
@@ -205,6 +151,7 @@ const Main = () => {
           ))}
           <Button container variant="contained" onClick={() => setHsl(hslArr)} color="default">Reset HSL</Button>
         </ColorContainer>
+        {/* GrayScale */}
         <ColorContainer display={tabs === 2 ? 'block' : 'none'}>
           <Grid container spacing={2} alignItems="center">
             <Grid item xs>
@@ -215,6 +162,21 @@ const Main = () => {
               <Typography>{greyScale}</Typography>
             </Grid>
           </Grid>
+        </ColorContainer>
+        {/* CMYK */}
+        <ColorContainer display={tabs === 3 ? `block` : `none`}>
+          {cmyk.map((v, index) => (
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs>
+                <PrettoSlider id={`cmyk[${index}]`} aria-label={`cmyk[${index}]`} color={v.color} max={100}
+                  value={v.value} valueLabelDisplay="auto" onChange={handleCMYK} />
+              </Grid>
+              <Grid item xs>
+                <Typography>{`${v.value}`}</Typography>
+              </Grid>
+            </Grid>
+          ))}
+          <Button container variant="contained" onClick={() => setHsl(hslArr)} color="default">Reset HSL</Button>
         </ColorContainer>
       </Container>
     </main>
