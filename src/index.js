@@ -62,6 +62,7 @@ function RGBToHSL(r, g, b) {
 
 const Main = () => {
 
+  // Array of Color Spaces
   const rgbArr = [
     { "color": "red", "value": 0 },
     { "color": "green", "value": 0 },
@@ -73,10 +74,13 @@ const Main = () => {
     { "color": "lighten", "value": 0 }
   ];
 
+  // Variable for state management
   const [rgb, setRgb] = useState(rgbArr);
   const [hsl, setHsl] = useState(hslArr);
+  const [greyScale, setGreyScale] = useState(100);
   const [tabs, setTabs] = useState(0);
 
+  // Function
   function handleRGB(event, newValue) {
     const index = event.currentTarget.id !== undefined ? event.currentTarget.id : event.target.ariaLabel;
 
@@ -92,16 +96,20 @@ const Main = () => {
     hsl[1].value = parseInt(rgb2hsl.saturate);
     hsl[2].value = parseInt(rgb2hsl.lightness);
   }
-  
+
   function handleHSL(event, newValue) {
     const index = event.currentTarget.id !== undefined ? event.currentTarget.id : event.target.ariaLabel;
-    
+
     setHsl([
       { "color": "hue", "value": index === "hsl[0]" ? newValue : hsl[0].value },
       { "color": "saturate", "value": index === "hsl[1]" ? newValue : hsl[1].value },
       { "color": "lighten", "value": index === "hsl[2]" ? newValue : hsl[2].value }
     ]);
     console.log(`Hue: ${hsl[0].value}\nSaturate: ${hsl[1].value}\nLight: ${hsl[2].value}`);
+  }
+
+  function handleGreyScale(event, newValue){
+    setGreyScale(newValue);
   }
 
   function handleTabs(event, newValue) {
@@ -116,12 +124,12 @@ const Main = () => {
           { apply: "red", params: [rgb[0].value] },
           { apply: "green", params: [rgb[1].value] },
           { apply: "blue", params: [rgb[2].value] }
-        ] : tabs === 1 ?  [
+        ] : tabs === 1 ? [
           { apply: "hue", params: [hsl[0].value] },
           { apply: "saturate", params: [hsl[1].value] },
           { apply: "lighten", params: [hsl[2].value] },
-        ] : 
-          [{ apply: "desaturate", params: [0] },]
+        ] :
+          [{ apply: "desaturate", params: [100] },]
         }
       />
       <Container >
@@ -142,7 +150,7 @@ const Main = () => {
                 <PrettoSlider id={`rgb[${index}]`} value={v.value} aria-label={`rgb[${index}]`} color={v.color} max={255}
                   valueLabelDisplay="auto" defaultValue={0} onChange={handleRGB} />
               </Grid>
-              <Grid item >
+              <Grid item xs>
                 <Typography>{`${v.value}`}</Typography>
               </Grid>
             </Grid>
@@ -153,13 +161,25 @@ const Main = () => {
           {hsl.map((v, index) => (
             <Grid container spacing={2} alignItems="center">
               <Grid item xs>
-                <HueSlider id={`hsl[${index}]`} aria-label={`hsl[${index}]`} max={v.color === "hue" ? 360 : 100} value={v.value} valueLabelDisplay="auto" onChange={handleHSL} />
+                <PrettoSlider id={`hsl[${index}]`} aria-label={`hsl[${index}]`} color="black" max={v.color === "hue" ? 360 : 100} value={v.value} valueLabelDisplay="auto" onChange={handleHSL} />
               </Grid>
-              <Grid item >
+              <Grid item xs>
                 <Typography>{`${v.value}`}</Typography>
               </Grid>
             </Grid>
           ))}
+          <Button container variant="contained" onClick={() => setHsl(hslArr)} color="default">Reset HSL</Button>
+        </ColorContainer>
+        <ColorContainer display={tabs === 2 ? 'block' : 'none'}>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs>
+              <PrettoSlider id='greyscale' value={greyScale} aria-label='greyscale' color='grey' max={100}
+                valueLabelDisplay="auto" defaultValue={100} onChange={handleGreyScale} />
+            </Grid>
+            <Grid item xs>
+              <Typography>{greyScale}</Typography>
+            </Grid>
+          </Grid>
         </ColorContainer>
       </Container>
     </main>
@@ -172,37 +192,6 @@ const ColorContainer = withStyles({
   })
 })(Container);
 
-const HueSlider = withStyles({
-  root: {
-    marginTop: 10,
-    background: "grey",
-    height: 8,
-  },
-  thumb: {
-    height: 24,
-    width: 24,
-    backgroundColor: '#fff',
-    border: '2px solid currentColor',
-    marginTop: -8,
-    marginLeft: -12,
-    '&:focus, &:hover, &$active': {
-      boxShadow: 'inherit',
-    },
-  },
-  active: {},
-  valueLabel: {
-    left: 'calc(-50% + 4px)',
-  },
-  track: {
-    height: 8,
-    borderRadius: 0,
-  },
-  rail: {
-    // width: 508,
-    height: 0,
-    borderRadius: 0,
-  },
-})(Slider);
 
 const PrettoSlider = withStyles({
   root: props => ({
