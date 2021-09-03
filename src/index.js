@@ -8,10 +8,12 @@ import { Jimage } from 'react-jimp';
 
 const App = () => {
   return (
-    <Main />
+    <Main ></Main>
   );
 }
-function RGBToHSL(r, g, b) {
+
+// Function to convert
+function rgbToHSL(r, g, b) {
   // Make r, g, and b fractions of 1
   r /= 255;
   g /= 255;
@@ -60,6 +62,35 @@ function RGBToHSL(r, g, b) {
   return { hue: h, saturate: s, lightness: l };
 }
 
+function hslToRgb(h, s, l) {
+  var r, g, b;
+
+  h /= 360;
+  s /= 100;
+  l /= 100;
+
+  if (s === 0) {
+    r = g = b = l; // achromatic
+  } else {
+    var hue2rgb = function hue2rgb(p, q, t) {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1 / 6) return p + (q - p) * 6 * t;
+      if (t < 1 / 2) return q;
+      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+      return p;
+    }
+
+    var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    var p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1 / 3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1 / 3);
+  }
+
+  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
 const Main = () => {
 
   // Array of Color Spaces
@@ -90,8 +121,7 @@ const Main = () => {
       { "color": "blue", "value": index === "rgb[2]" ? newValue : rgb[2].value }
     ]);
 
-    console.log(`Red: ${rgb[0].value}\nGreen: ${rgb[1].value}\nBlue: ${rgb[2].value}`);
-    const rgb2hsl = RGBToHSL(rgb[0].value, rgb[1].value, rgb[2].value);
+    const rgb2hsl = rgbToHSL(rgb[0].value, rgb[1].value, rgb[2].value);
     hsl[0].value = rgb2hsl.hue;
     hsl[1].value = parseInt(rgb2hsl.saturate);
     hsl[2].value = parseInt(rgb2hsl.lightness);
@@ -105,10 +135,13 @@ const Main = () => {
       { "color": "saturate", "value": index === "hsl[1]" ? newValue : hsl[1].value },
       { "color": "lighten", "value": index === "hsl[2]" ? newValue : hsl[2].value }
     ]);
-    console.log(`Hue: ${hsl[0].value}\nSaturate: ${hsl[1].value}\nLight: ${hsl[2].value}`);
+    const hsl2rgb = hslToRgb(hsl[0].value, hsl[1].value, hsl[2].value);
+    rgb[0].value = hsl2rgb[0];
+    rgb[1].value = hsl2rgb[1];
+    rgb[2].value = hsl2rgb[2];
   }
 
-  function handleGreyScale(event, newValue){
+  function handleGreyScale(event, newValue) {
     setGreyScale(newValue);
   }
 
