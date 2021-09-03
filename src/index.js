@@ -12,6 +12,8 @@ const App = () => {
   );
 }
 
+
+
 // Function to convert
 function rgbToHSL(r, g, b) {
   // Make r, g, and b fractions of 1
