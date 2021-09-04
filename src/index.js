@@ -102,16 +102,14 @@ const Main = () => {
   }, // eslint-disable-next-line
   [cmyk]);
 
-  // Function
+  //* Function
   function handleRGB(event, newValue) {
     const index = event.currentTarget.id !== undefined ? event.currentTarget.id : event.target.ariaLabel;
-
     setRgb([
       { "color": "red", "value": index === "rgb[0]" ? newValue : rgb[0].value },
       { "color": "green", "value": index === "rgb[1]" ? newValue : rgb[1].value },
       { "color": "blue", "value": index === "rgb[2]" ? newValue : rgb[2].value }
     ]);
-
   }
 
   function handleHSL(event, newValue) {
@@ -121,7 +119,6 @@ const Main = () => {
       { "color": "saturate", "value": index === "hsl[1]" ? newValue : hsl[1].value },
       { "color": "lighten", "value": index === "hsl[2]" ? newValue : hsl[2].value }
     ]);
-
   }
 
   function handleCMYK(event, newValue) {
@@ -200,7 +197,7 @@ const Main = () => {
               </Grid>
             </Grid>
           ))}
-          <Button container variant="contained" onClick={() => setHsl(hslArr)} color="default">Reset HSL</Button>
+          <Button container variant="contained" onClick={() => setRgb(rgbArr)} color="default">Reset HSL</Button>
         </ColorContainer>
         {/* GrayScale */}
         <ColorContainer display={tabs === 2 ? 'block' : 'none'}>
@@ -227,13 +224,13 @@ const Main = () => {
               </Grid>
             </Grid>
           ))}
-          <Button container variant="contained" onClick={() => setHsl(hslArr)} color="default">Reset HSL</Button>
+          <Button container variant="contained" onClick={() => setRgb(rgbArr)} color="default">Reset CMYK</Button>
         </ColorContainer>
-
       </Container>
     </main>
   );
 };
+
 
 const ColorContainer = withStyles({
   root: props => ({
@@ -262,11 +259,12 @@ const PrettoSlider = withStyles({
   valueLabel: {
     left: 'calc(-50% + 4px)',
   },
-  track:{
-    background: "inherit",
+  track: props => ({
+    background: props.background === 'linear-gradient(to right, red, yellow, green, cyan, blue, magenta, red)' 
+    ? 'inherit' : null,
     height: 8,
     borderRadius: 4,
-  },
+  }),
   rail: props => ( {
     background: props.background,
     height: 8,
