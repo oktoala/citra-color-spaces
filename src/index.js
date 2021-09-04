@@ -4,7 +4,7 @@ import { Container, Slider, Grid, Typography, Paper, Tabs, Tab, Button } from '@
 import { withStyles } from '@material-ui/core/styles';
 import { React, useState, useEffect } from 'react';
 import { Jimage } from 'react-jimp';
-import { rgbToHSL, hslToRgb, cmykToRgb, rgbToCmyk, rgbToHex } from './converter';
+import { rgbToHSL, hslToRgb, cmykToRgb, rgbToCmyk, rgbToHex, hslToCmyk, cmykToHsl } from './converter';
 
 const App = () => {
   return (
@@ -79,6 +79,9 @@ const Main = () => {
   useEffect(() => {
     const hsl2rgb = hslToRgb(hsl[0].value, hsl[1].value, hsl[2].value);
     lazyRgb(hsl2rgb);
+
+    const hsl2cmyk = hslToCmyk(hsl[0].value, hsl[1].value, hsl[2].value);
+    lazyCmyk(hsl2cmyk);
     
     console.log('HSL');
     setHex(rgbToHex(rgb[0].value, rgb[1].value, rgb[2].value));
@@ -90,6 +93,9 @@ const Main = () => {
   useEffect(() => {
     const cmyk2rgb = cmykToRgb(cmyk[0].value, cmyk[1].value, cmyk[2].value, cmyk[3].value);
     lazyRgb(cmyk2rgb);
+
+    const cmyk2hsl = cmykToHsl(cmyk[0].value, cmyk[1].value, cmyk[2].value, cmyk[3].value);
+    lazyHsl(cmyk2hsl);
     
     console.log('CMYK');
     setHex(rgbToHex(rgb[0].value, rgb[1].value, rgb[2].value));

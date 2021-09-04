@@ -121,3 +121,27 @@ export function hslToRgb(h, s, l) {
     return {red: Math.round(r * 255), green: Math.round(g * 255), blue: Math.round(b * 255)};
 }
 
+export function hslToCmyk(h, s, l){
+    const rgb = hslToRgb(h, s, l);
+
+    const cmyk = rgbToCmyk(rgb.red, rgb.green, rgb.blue);
+
+    return {
+        c: cmyk.c,
+        m: cmyk.m,
+        y: cmyk.y,
+        k: cmyk.k,
+    };
+}
+
+export function cmykToHsl(c, m, y, k){
+    const rgb = cmykToRgb(c, m, y, k);
+
+    const hsl = rgbToHSL(rgb.red, rgb.green, rgb.blue);
+
+    return {
+        hue: hsl.hue,
+        saturate: hsl.saturate,
+        lightness: hsl.lightness
+    };
+}
