@@ -1,11 +1,10 @@
-import React from 'react';
 import ReactDOM from 'react-dom';
 import Image from './img/unnamed.jpg';
 import { Container, Slider, Grid, Typography, Paper, Tabs, Tab, Button } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
-import { useState } from 'react';
+import { React, useState, useEffect } from 'react';
 import { Jimage } from 'react-jimp';
-import { rgbToHSL, hslToRgb, cmykToRgb, rgbToCmyk } from './converter';
+import { rgbToHSL, hslToRgb, cmykToRgb, rgbToCmyk, rgbToHex } from './converter';
 
 const App = () => {
   return (
@@ -29,15 +28,60 @@ const Main = () => {
     { "color": "cyan", "value": 0 },
     { "color": "magenta", "value": 0 },
     { "color": "yellow", "value": 0 },
-    { "color": "black", "value": 0 }
+    { "color": "black", "value": 100 }
   ];
 
   // Variable for state management
   const [rgb, setRgb] = useState(rgbArr);
   const [hsl, setHsl] = useState(hslArr);
   const [cmyk, setCmyk] = useState(cmykArr);
+  const [hex, setHex] = useState('#000000')
   const [greyScale, setGreyScale] = useState(100);
   const [tabs, setTabs] = useState(0);
+
+
+  // Function to control state
+
+  function lazyRgb(rgbObject) {
+    setHsl([
+        { "color": "red", "value": rgbObject.red },
+        { "color": "green", "value": rgbObject.green },
+        { "color": "blue", "value": rgbObject.ss }
+      ]);
+  };
+  function lazyHsl(hslkObject) {
+    setHsl([
+        { "color": "hue", "value": hslkObject.hue },
+        { "color": "saturate", "value": hslkObject.saturate },
+        { "color": "lighten", "value": hslkObject.lightness }
+      ]);
+  };
+  function lazyCmyk(cmykObject) {
+    setCmyk([
+      { "color": "cyan", "value": cmykObject.c },
+      { "color": "magenta", "value": cmykObject.m },
+      { "color": "yellow", "value": cmykObject.y },
+      { "color": "black", "value": cmykObject.k },
+    ]);
+  };
+  
+  // For RGB Handle
+  useEffect(() => {
+    const rgb2hsl = rgbToHSL(rgb[0].value, rgb[1].value, rgb[2].value);
+    lazyHsl(rgb2hsl);
+
+    const rgb2cmyk = rgbToCmyk(rgb[0].value, rgb[1].value, rgb[2].value);
+
+    lazyCmyk(rgb2cmyk);
+
+    setHex(rgbToHex(rgb[0].value, rgb[1].value, rgb[2].value));
+
+  }, [rgb]);
+
+  useEffect(() => {
+
+  })
+
 
   // Function
   function handleRGB(event, newValue) {
@@ -49,16 +93,6 @@ const Main = () => {
       { "color": "blue", "value": index === "rgb[2]" ? newValue : rgb[2].value }
     ]);
 
-    const rgb2hsl = rgbToHSL(rgb[0].value, rgb[1].value, rgb[2].value);
-    hsl[0].value = rgb2hsl.hue;
-    hsl[1].value = parseInt(rgb2hsl.saturate);
-    hsl[2].value = parseInt(rgb2hsl.lightness);
-
-    const rgb2cmyk = rgbToCmyk(rgb[0].value, rgb[1].value, rgb[2].value);
-    cmyk[0].value = rgb2cmyk.c;
-    cmyk[1].value = rgb2cmyk.m;
-    cmyk[2].value = rgb2cmyk.y;
-    cmyk[3].value = rgb2cmyk.k;
   }
 
   function handleHSL(event, newValue) {
@@ -69,10 +103,12 @@ const Main = () => {
       { "color": "lighten", "value": index === "hsl[2]" ? newValue : hsl[2].value }
     ]);
     const hsl2rgb = hslToRgb(hsl[0].value, hsl[1].value, hsl[2].value);
-    rgb[0].value = hsl2rgb[0];
-    rgb[1].value = hsl2rgb[1];
-    rgb[2].value = hsl2rgb[2];
+    rgb[0].value = hsl2rgb.red;
+    rgb[1].value = hsl2rgb.green;
+    rgb[2].value = hsl2rgb.blue;
     setRgb(rgb);
+
+    setHex(rgbToHex(rgb[0].value, rgb[1].value, rgb[2].value));
   }
 
   function handleCMYK(event, newValue) {
@@ -84,10 +120,12 @@ const Main = () => {
       { "color": "black", "value": index === "cmyk[3]" ? newValue : cmyk[3].value }
     ]);
     const cmyk2rgb = cmykToRgb(cmyk[0].value, cmyk[1].value, cmyk[2].value, cmyk[3].value);
-    rgb[0].value = cmyk2rgb.r;
-    rgb[1].value = cmyk2rgb.g;
-    rgb[2].value = cmyk2rgb.b;
+    rgb[0].value = cmyk2rgb.red;
+    rgb[1].value = cmyk2rgb.green;
+    rgb[2].value = cmyk2rgb.blue;
     setRgb(rgb);
+
+    setHex(rgbToHex(rgb[0].value, rgb[1].value, rgb[2].value));
   }
 
   function handleGreyScale(event, newValue) {
@@ -100,16 +138,19 @@ const Main = () => {
 
   return (
     <main className="main">
-      <Jimage
-        src={Image}
-        color={tabs === 0 || tabs === 1 || tabs === 3 ? [
-          { apply: "red", params: [rgb[0].value] },
-          { apply: "green", params: [rgb[1].value] },
-          { apply: "blue", params: [rgb[2].value] }
-        ] :
-          [{ apply: "desaturate", params: [100] },]
-        }
-      />
+      <Container>
+        <Jimage
+          src={Image}
+          color={tabs === 0 || tabs === 1 || tabs === 3 ? [
+            { apply: "red", params: [rgb[0].value] },
+            { apply: "green", params: [rgb[1].value] },
+            { apply: "blue", params: [rgb[2].value] }
+          ] :
+            [{ apply: "desaturate", params: [100] },]
+          }
+        />
+        <TypeGraph color={hex}>{hex}</TypeGraph>
+      </Container>
       <Container >
         <Paper square>
           <Tabs
@@ -178,6 +219,7 @@ const Main = () => {
           ))}
           <Button container variant="contained" onClick={() => setHsl(hslArr)} color="default">Reset HSL</Button>
         </ColorContainer>
+
       </Container>
     </main>
   );
@@ -220,13 +262,19 @@ const PrettoSlider = withStyles({
   },
 })(Slider);
 
+const TypeGraph = withStyles({
+  root: props => ({
+    color: props.color
+  })
+})(Typography);
+
 
 export default App;
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />,
-  </React.StrictMode>,
+  // <React.StrictMode>
+  <App />,
+  // </React.StrictMode>,
   document.getElementById('root')
 );
 
