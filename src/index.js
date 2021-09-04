@@ -43,28 +43,24 @@ const Main = () => {
   // Function to control state
 
   function lazyRgb(rgbObject) {
-    setHsl([
-        { "color": "red", "value": rgbObject.red },
-        { "color": "green", "value": rgbObject.green },
-        { "color": "blue", "value": rgbObject.ss }
-      ]);
+    rgb[0].value = rgbObject.red;
+    rgb[1].value = rgbObject.green;
+    rgb[2].value = rgbObject.blue
   };
-  function lazyHsl(hslkObject) {
-    setHsl([
-        { "color": "hue", "value": hslkObject.hue },
-        { "color": "saturate", "value": hslkObject.saturate },
-        { "color": "lighten", "value": hslkObject.lightness }
-      ]);
+  function lazyHsl(hslObject) {
+    hsl[0].value = hslObject.hue;
+    hsl[1].value = hslObject.saturate;
+    hsl[2].value = hslObject.lightness;
+
   };
   function lazyCmyk(cmykObject) {
-    setCmyk([
-      { "color": "cyan", "value": cmykObject.c },
-      { "color": "magenta", "value": cmykObject.m },
-      { "color": "yellow", "value": cmykObject.y },
-      { "color": "black", "value": cmykObject.k },
-    ]);
+    cmyk[0].value = cmykObject.c;
+    cmyk[1].value = cmykObject.m;
+    cmyk[2].value = cmykObject.y;
+    cmyk[3].value = cmykObject.k;
+
   };
-  
+
   // For RGB Handle
   useEffect(() => {
     const rgb2hsl = rgbToHSL(rgb[0].value, rgb[1].value, rgb[2].value);
@@ -74,14 +70,29 @@ const Main = () => {
 
     lazyCmyk(rgb2cmyk);
 
+    console.log('RGB');
     setHex(rgbToHex(rgb[0].value, rgb[1].value, rgb[2].value));
-
+    
   }, [rgb]);
-
+  
+  // For HSL Handle
   useEffect(() => {
-
-  })
-
+    const hsl2rgb = hslToRgb(hsl[0].value, hsl[1].value, hsl[2].value);
+    lazyRgb(hsl2rgb);
+    
+    console.log('HSL');
+    setHex(rgbToHex(rgb[0].value, rgb[1].value, rgb[2].value));
+    
+  }, [hsl]);
+  
+  // For CMYK Handle
+  useEffect(() => {
+    const cmyk2rgb = cmykToRgb(cmyk[0].value, cmyk[1].value, cmyk[2].value, cmyk[3].value);
+    lazyRgb(cmyk2rgb);
+    
+    console.log('CMYK');
+    setHex(rgbToHex(rgb[0].value, rgb[1].value, rgb[2].value));
+  }, [cmyk]);
 
   // Function
   function handleRGB(event, newValue) {
@@ -102,13 +113,7 @@ const Main = () => {
       { "color": "saturate", "value": index === "hsl[1]" ? newValue : hsl[1].value },
       { "color": "lighten", "value": index === "hsl[2]" ? newValue : hsl[2].value }
     ]);
-    const hsl2rgb = hslToRgb(hsl[0].value, hsl[1].value, hsl[2].value);
-    rgb[0].value = hsl2rgb.red;
-    rgb[1].value = hsl2rgb.green;
-    rgb[2].value = hsl2rgb.blue;
-    setRgb(rgb);
 
-    setHex(rgbToHex(rgb[0].value, rgb[1].value, rgb[2].value));
   }
 
   function handleCMYK(event, newValue) {
@@ -119,13 +124,7 @@ const Main = () => {
       { "color": "yellow", "value": index === "cmyk[2]" ? newValue : cmyk[2].value },
       { "color": "black", "value": index === "cmyk[3]" ? newValue : cmyk[3].value }
     ]);
-    const cmyk2rgb = cmykToRgb(cmyk[0].value, cmyk[1].value, cmyk[2].value, cmyk[3].value);
-    rgb[0].value = cmyk2rgb.red;
-    rgb[1].value = cmyk2rgb.green;
-    rgb[2].value = cmyk2rgb.blue;
-    setRgb(rgb);
 
-    setHex(rgbToHex(rgb[0].value, rgb[1].value, rgb[2].value));
   }
 
   function handleGreyScale(event, newValue) {
@@ -183,7 +182,10 @@ const Main = () => {
           {hsl.map((v, index) => (
             <Grid container spacing={2} alignItems="center">
               <Grid item xs>
-                <PrettoSlider id={`hsl[${index}]`} aria-label={`hsl[${index}]`} color="black" max={v.color === "hue" ? 360 : 100} value={v.value} valueLabelDisplay="auto" onChange={handleHSL} />
+                <PrettoSlider id={`hsl[${index}]`} aria-label={`hsl[${index}]`} 
+                color="black" max={v.color === "hue" ? 360 : 100} value={v.value} valueLabelDisplay="auto" 
+                onChange={handleHSL} 
+                background={v.color === "hue" ? 'linear-gradient(to right, red, yellow, green, cyan, blue, magenta, red)' : 'black'} />
               </Grid>
               <Grid item xs>
                 <Typography>{`${v.value}`}</Typography>
@@ -252,14 +254,16 @@ const PrettoSlider = withStyles({
   valueLabel: {
     left: 'calc(-50% + 4px)',
   },
-  track: {
+  track:{
+    background: "inherit",
     height: 8,
     borderRadius: 4,
   },
-  rail: {
+  rail: props => ( {
+    background: props.background,
     height: 8,
     borderRadius: 4,
-  },
+  }),
 })(Slider);
 
 const TypeGraph = withStyles({
