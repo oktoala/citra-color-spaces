@@ -65,7 +65,7 @@ const Main = () => {
   useEffect(() => {
     const rgb2hsl = rgbToHSL(rgb[0].value, rgb[1].value, rgb[2].value);
     lazyHsl(rgb2hsl);
-
+    
     const rgb2cmyk = rgbToCmyk(rgb[0].value, rgb[1].value, rgb[2].value);
     lazyCmyk(rgb2cmyk);
 
