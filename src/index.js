@@ -67,13 +67,13 @@ const Main = () => {
     lazyHsl(rgb2hsl);
 
     const rgb2cmyk = rgbToCmyk(rgb[0].value, rgb[1].value, rgb[2].value);
-
     lazyCmyk(rgb2cmyk);
 
     console.log('RGB');
     setHex(rgbToHex(rgb[0].value, rgb[1].value, rgb[2].value));
     
-  }, [rgb]);
+  }, // eslint-disable-next-line
+  [rgb]);
   
   // For HSL Handle
   useEffect(() => {
@@ -83,7 +83,8 @@ const Main = () => {
     console.log('HSL');
     setHex(rgbToHex(rgb[0].value, rgb[1].value, rgb[2].value));
     
-  }, [hsl]);
+  }, // eslint-disable-next-line
+  [hsl]);
   
   // For CMYK Handle
   useEffect(() => {
@@ -92,7 +93,8 @@ const Main = () => {
     
     console.log('CMYK');
     setHex(rgbToHex(rgb[0].value, rgb[1].value, rgb[2].value));
-  }, [cmyk]);
+  }, // eslint-disable-next-line
+  [cmyk]);
 
   // Function
   function handleRGB(event, newValue) {
