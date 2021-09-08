@@ -224,9 +224,9 @@ const Main = () => {
         {/* Histogram */}
         <ColorContainer display={tabs === 3 ? `block` : `none`}>
           <Grid container spacing={2} alignItems="center">
-            {histoGram["red"]}
             {Object.keys(histogram).map((value, index) => (
-              <Grid item xs>
+              <Grid item xs danger>
+                <div dangerouslySetInnerHTML={{__html: histoGram[value]}}></div>
               </Grid>
             ))}
           </Grid>

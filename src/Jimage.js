@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import JIMP from 'jimp';
 
 export const histoGram = {
-    red: <div></div>,
-    green: <div></div>,
-    blue: <div></div>,
+    red: "",
+    green: "",
+    blue: ""
 };
 
 export const Jimage = (props) => {
@@ -113,15 +113,15 @@ export const Jimage = (props) => {
     }
 
     function createHistogram(colourFrequencies) {
-        const histWidth = 256;
+        const histWidth = 255;
         const histHeight = 316;
         const columnWidth = 1; /* Ini jadi bins */
 
-        let hexColour;
-        let x = 0;
-        let columnHeight;
-
+        
         for (const key in colourFrequencies) {
+            let hexColour;
+            let x = 0;
+            let columnHeight;
             let svgstring = `<svg width='${histWidth}px' height='${histHeight}px' xmlns='http://www.w3.org/2000/svg' version='1.1'>\n`;
 
             if (Object.hasOwnProperty.call(colourFrequencies, key)) {
@@ -131,17 +131,16 @@ export const Jimage = (props) => {
                     switch (colourFrequencies[key].index) {
                         case 0:
                             hexColour = "red";
-                            break
+                            break;
                         case 1:
                             hexColour = "green";
-                            break
+                            break;
                         case 2:
                             hexColour = "blue";
-                            break
+                            break;
                         default:
                             break;
                     }
-    
                     columnHeight = colourFrequencies[key].colourFrequencies[i] * pixelsPerUnit;
 
                     svgstring += `    <rect fill='${hexColour}' stroke='${hexColour}' stroke-width='0.25px' width='${columnWidth}' height='${columnHeight}' y='${histHeight - columnHeight}' x='${x}' />\n`;
