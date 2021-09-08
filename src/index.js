@@ -1,10 +1,11 @@
 import ReactDOM from 'react-dom';
 import Image from './img/unnamed.jpg';
-import { Container, Slider, Grid, Typography, Paper, Tabs, Tab, Button } from '@material-ui/core';
-import { withStyles } from '@material-ui/core/styles';
+import { Container, Slider, Grid, Typography, Paper, Tabs, Tab, Button, Checkbox, FormControlLabel } from '@material-ui/core';
+import { withStyles, makeStyles } from '@material-ui/core/styles';
 import { React, useState, useEffect } from 'react';
-import { Jimage } from 'react-jimp';
+import { Jimage } from './Jimage';
 import { rgbToHSL, hslToRgb, cmykToRgb, rgbToCmyk, rgbToHex, hslToCmyk, cmykToHsl } from './converter';
+import { Form } from 'react-bootstrap';
 
 const App = () => {
   return (
@@ -36,7 +37,7 @@ const Main = () => {
   const [hsl, setHsl] = useState(hslArr);
   const [cmyk, setCmyk] = useState(cmykArr);
   const [hex, setHex] = useState('#000000')
-  const [greyScale, setGreyScale] = useState(100);
+  const [greyScale, setGreyScale] = useState(false);
   const [tabs, setTabs] = useState(0);
 
 
@@ -65,16 +66,16 @@ const Main = () => {
   useEffect(() => {
     const rgb2hsl = rgbToHSL(rgb[0].value, rgb[1].value, rgb[2].value);
     lazyHsl(rgb2hsl);
-    
+
     const rgb2cmyk = rgbToCmyk(rgb[0].value, rgb[1].value, rgb[2].value);
     lazyCmyk(rgb2cmyk);
 
     console.log('RGB');
     setHex(rgbToHex(rgb[0].value, rgb[1].value, rgb[2].value));
-    
+
   }, // eslint-disable-next-line
-  [rgb]);
-  
+    [rgb]);
+
   // For HSL Handle
   useEffect(() => {
     const hsl2rgb = hslToRgb(hsl[0].value, hsl[1].value, hsl[2].value);
@@ -82,13 +83,13 @@ const Main = () => {
 
     const hsl2cmyk = hslToCmyk(hsl[0].value, hsl[1].value, hsl[2].value);
     lazyCmyk(hsl2cmyk);
-    
+
     console.log('HSL');
     setHex(rgbToHex(rgb[0].value, rgb[1].value, rgb[2].value));
-    
+
   }, // eslint-disable-next-line
-  [hsl]);
-  
+    [hsl]);
+
   // For CMYK Handle
   useEffect(() => {
     const cmyk2rgb = cmykToRgb(cmyk[0].value, cmyk[1].value, cmyk[2].value, cmyk[3].value);
@@ -96,11 +97,11 @@ const Main = () => {
 
     const cmyk2hsl = cmykToHsl(cmyk[0].value, cmyk[1].value, cmyk[2].value, cmyk[3].value);
     lazyHsl(cmyk2hsl);
-    
+
     console.log('CMYK');
     setHex(rgbToHex(rgb[0].value, rgb[1].value, rgb[2].value));
   }, // eslint-disable-next-line
-  [cmyk]);
+    [cmyk]);
 
   //* Function
   function handleRGB(event, newValue) {
@@ -140,20 +141,32 @@ const Main = () => {
     setTabs(newValue);
   }
 
+
+
+  const classes = useStyles();
   return (
-    <main className="main">
+    <main className={classes.root}>
       <Container>
-        <Jimage
-          src={Image}
-          color={tabs === 0 || tabs === 1 || tabs === 3 ? [
-            { apply: "red", params: [rgb[0].value] },
-            { apply: "green", params: [rgb[1].value] },
-            { apply: "blue", params: [rgb[2].value] }
-          ] :
-            [{ apply: "desaturate", params: [100] },]
-          }
-        />
+        <Grid container spacing={12} alignItems="center">
+          <Grid item xs className={classes.image}>
+            <Jimage
+              src={Image}
+              color={!greyScale ? [
+                { apply: "red", params: [rgb[0].value] },
+                { apply: "green", params: [rgb[1].value] },
+                { apply: "blue", params: [rgb[2].value] }
+              ] :
+                [{ apply: "desaturate", params: [100] },]
+              }
+            />
+          </Grid>
+          <Grid item xs>Red</Grid>
+          <Grid item xs>Green</Grid>
+          <Grid item xs>Blue</Grid>
+          <Grid item xs>Grayscale</Grid>
+        </Grid>
         <TypeGraph color={hex}>{hex}</TypeGraph>
+        <FormControlLabel label="Greyscale" control={<Checkbox checked={greyScale} onChange={handleGreyScale} />} />
       </Container>
       <Container >
         <Paper square>
@@ -163,7 +176,6 @@ const Main = () => {
             aria-label="disabled tabs example">
             <Tab label="RGB" />
             <Tab label="HSL" />
-            <Tab label="Grayscale" />
             <Tab label="CMYK" />
           </Tabs>
         </Paper>
@@ -172,7 +184,7 @@ const Main = () => {
           {rgb.map((v, index) => (
             <Grid container spacing={2} alignItems="center">
               <Grid item xs>
-                <PrettoSlider id={`rgb[${index}]`} value={v.value} aria-label={`rgb[${index}]`} color={v.color} max={255}
+                <PrettoSlider disabled={greyScale} id={`rgb[${index}]`} value={v.value} aria-label={`rgb[${index}]`} color={v.color} max={255}
                   valueLabelDisplay="auto" defaultValue={0} onChange={handleRGB} />
               </Grid>
               <Grid item xs>
@@ -187,10 +199,10 @@ const Main = () => {
           {hsl.map((v, index) => (
             <Grid container spacing={2} alignItems="center">
               <Grid item xs>
-                <PrettoSlider id={`hsl[${index}]`} aria-label={`hsl[${index}]`} 
-                color="black" max={v.color === "hue" ? 360 : 100} value={v.value} valueLabelDisplay="auto" 
-                onChange={handleHSL} 
-                background={v.color === "hue" ? 'linear-gradient(to right, red, yellow, green, cyan, blue, magenta, red)' : 'black'} />
+                <PrettoSlider disabled={greyScale} id={`hsl[${index}]`} aria-label={`hsl[${index}]`}
+                  color="black" max={v.color === "hue" ? 360 : 100} value={v.value} valueLabelDisplay="auto"
+                  onChange={handleHSL}
+                  background={v.color === "hue" ? 'linear-gradient(to right, red, yellow, green, cyan, blue, magenta, red)' : 'black'} />
               </Grid>
               <Grid item xs>
                 <Typography>{`${v.value}`}</Typography>
@@ -199,24 +211,12 @@ const Main = () => {
           ))}
           <Button container variant="contained" onClick={() => setRgb(rgbArr)} color="default">Reset HSL</Button>
         </ColorContainer>
-        {/* GrayScale */}
-        <ColorContainer display={tabs === 2 ? 'block' : 'none'}>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs>
-              <PrettoSlider id='greyscale' value={greyScale} aria-label='greyscale' color='grey' max={100}
-                valueLabelDisplay="auto" defaultValue={100} onChange={handleGreyScale} />
-            </Grid>
-            <Grid item xs>
-              <Typography>{greyScale}</Typography>
-            </Grid>
-          </Grid>
-        </ColorContainer>
         {/* CMYK */}
-        <ColorContainer display={tabs === 3 ? `block` : `none`}>
+        <ColorContainer display={tabs === 2 ? `block` : `none`}>
           {cmyk.map((v, index) => (
             <Grid container spacing={2} alignItems="center">
               <Grid item xs>
-                <PrettoSlider id={`cmyk[${index}]`} aria-label={`cmyk[${index}]`} color={v.color} max={100}
+                <PrettoSlider disabled={greyScale} id={`cmyk[${index}]`} aria-label={`cmyk[${index}]`} color={v.color} max={100}
                   value={v.value} valueLabelDisplay="auto" onChange={handleCMYK} />
               </Grid>
               <Grid item xs>
@@ -231,6 +231,20 @@ const Main = () => {
   );
 };
 
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+  },
+  paper: {
+    padding: theme.spacing(2),
+    textAlign: 'center',
+    color: theme.palette.text.secondary,
+  },
+  image: {
+    marginRight: 100,
+  }
+}));
 
 const ColorContainer = withStyles({
   root: props => ({
@@ -260,12 +274,12 @@ const PrettoSlider = withStyles({
     left: 'calc(-50% + 4px)',
   },
   track: props => ({
-    background: props.background === 'linear-gradient(to right, red, yellow, green, cyan, blue, magenta, red)' 
-    ? 'inherit' : null,
+    background: props.background === 'linear-gradient(to right, red, yellow, green, cyan, blue, magenta, red)'
+      ? 'inherit' : null,
     height: 8,
     borderRadius: 4,
   }),
-  rail: props => ( {
+  rail: props => ({
     background: props.background,
     height: 8,
     borderRadius: 4,
@@ -279,7 +293,7 @@ const TypeGraph = withStyles({
 })(Typography);
 
 
-export default App;
+// export default App;
 
 ReactDOM.render(
   // <React.StrictMode>
