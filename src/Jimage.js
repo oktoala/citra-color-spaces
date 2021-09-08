@@ -1,5 +1,11 @@
-import React, { useEffect, useState } from 'react'
-import JIMP from 'jimp'
+import React, { useEffect, useState } from 'react';
+import JIMP from 'jimp';
+
+export const histoGram = {
+    red: <div></div>,
+    green: <div></div>,
+    blue: <div></div>,
+};
 
 export const Jimage = (props) => {
     const options = props;
@@ -10,7 +16,6 @@ export const Jimage = (props) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-
         async function imgEffect() {
             const loadImage = await JIMP.read(src);
 
@@ -50,12 +55,111 @@ export const Jimage = (props) => {
             const mime = await loadImage.getBase64Async(JIMP.MIME_JPEG);
             setLoading(false);
             setImage(mime);
+            await JIMP.read(mime, function (err, photo) {
+                histogramRGB(histoGram, photo);
+            });
         }
+
 
         imgEffect();
         return () => setLoading(true);
     }, [src, options]);
 
+    function histogramRGB(channels, photo) {
+        const colourFrequencies = getColourFrequencies(photo);
+
+        createHistogram(colourFrequencies);
+    }
+
+    function getColourFrequencies(photo) {
+        const result = {
+            red: {
+                index: 0,
+                colourFrequencies: 0,
+                maxFrequency: 0
+            },
+            green: {
+                index: 1,
+                colourFrequencies: 0,
+                maxFrequency: 0
+            },
+            blue: {
+                index: 2,
+                colourFrequencies: 0,
+                maxFrequency: 0
+            }
+        };
+        for (const key in result) {
+
+            const startIndex = result[key]["index"];
+
+            let maxFrequency = 0;
+            const colourFrequencies = Array(256).fill(0);
+
+            if (Object.hasOwnProperty.call(result, key)) {
+                for (let i = startIndex, len = photo.bitmap.data.length; i < len; i += 4) {
+                    colourFrequencies[photo.bitmap.data[i]]++;
+                    if (colourFrequencies[photo.bitmap.data[i]] > maxFrequency) {
+                        maxFrequency++;
+                    }
+                }
+
+                result[key].colourFrequencies = colourFrequencies;
+                result[key].maxFrequency = maxFrequency;
+
+            }
+        }
+        return result;
+    }
+
+    function createHistogram(colourFrequencies) {
+        const histWidth = 256;
+        const histHeight = 316;
+        const columnWidth = 1; /* Ini jadi bins */
+
+        let hexColour;
+        let x = 0;
+        let columnHeight;
+
+        for (const key in colourFrequencies) {
+            let svgstring = `<svg width='${histWidth}px' height='${histHeight}px' xmlns='http://www.w3.org/2000/svg' version='1.1'>\n`;
+
+            if (Object.hasOwnProperty.call(colourFrequencies, key)) {
+                const pixelsPerUnit = histHeight / colourFrequencies[key].maxFrequency;
+
+                for (let i = 0; i < histWidth; i++) {
+                    switch (colourFrequencies[key].index) {
+                        case 0:
+                            hexColour = "red";
+                            break
+                        case 1:
+                            hexColour = "green";
+                            break
+                        case 2:
+                            hexColour = "blue";
+                            break
+                        default:
+                            break;
+                    }
+    
+                    columnHeight = colourFrequencies[key].colourFrequencies[i] * pixelsPerUnit;
+
+                    svgstring += `    <rect fill='${hexColour}' stroke='${hexColour}' stroke-width='0.25px' width='${columnWidth}' height='${columnHeight}' y='${histHeight - columnHeight}' x='${x}' />\n`;
+                    x += columnWidth;
+                }
+                svgstring += "</svg>";
+            }
+            if (colourFrequencies[key].index === 0) {
+                histoGram.red = svgstring;
+            }
+            else if (colourFrequencies[key].index === 1) {
+                histoGram.green = svgstring;
+            }
+            else if (colourFrequencies[key].index === 2) {
+                histoGram.blue = svgstring;
+            }
+        }
+    }
 
     return (<img
         className={className && className}

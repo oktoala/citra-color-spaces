@@ -1,9 +1,10 @@
+import Jimp from 'jimp';
 
-function createHistograms() {
-    const Jimp = require("jimp");
+async function  createHistograms(src) {
     const imghist = require('./imagehistograms.js');
 
-    Jimp.read("unnamed.jpg", function (err, photo) {
+
+    await Jimp.read(src, function (err, photo) {
         if (err) {
             console.error(err);
         }
@@ -36,7 +37,7 @@ function saveHistogram(histogramstring, filename) {
 }
 
 
-createHistograms();
+createHistograms("una.");
 
 
 const colorChannels =
@@ -91,7 +92,7 @@ function createHistogram(channel, colourFrequencies, maxFrequency) {
     let x = 0;
     let columnHeight;
 
-    let svgstring = `<svg width='${histWidth}px' height='${histHeight}px' xmlns='http://www.w3.org/2000/svg' version='1.1' xmlns:xlink='http://www.w3.org/1999/xlink'>\n`;
+    let svgstring = `<svg width='${histWidth}px' height='${histHeight}px' xmlns='http://www.w3.org/2000/svg' version='1.1'>\n`;
 
     // svgstring += `    <rect fill='#ffffff;' width='${histWidth}px' height='${histHeight}px' y='0' x='0' />\n`;
 

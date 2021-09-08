@@ -1,36 +1,38 @@
 import ReactDOM from 'react-dom';
 import Image from './img/unnamed.jpg';
+import { ReactComponent as HistRed } from './svg/histred.svg';
 import { Container, Slider, Grid, Typography, Paper, Tabs, Tab, Button, Checkbox, FormControlLabel } from '@material-ui/core';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import { React, useState, useEffect } from 'react';
-import { Jimage } from './Jimage';
+import { Jimage, histoGram } from './Jimage';
 import { rgbToHSL, hslToRgb, cmykToRgb, rgbToCmyk, rgbToHex, hslToCmyk, cmykToHsl } from './converter';
-import { Form } from 'react-bootstrap';
+import { red } from '@material-ui/core/colors';
 
 const App = () => {
   return (
-    <Main ></Main>
+    <Main></Main>
   );
 }
-const Main = () => {
+// Array of Color Spaces
+const rgbArr = [
+  { "color": "red", "value": 0 },
+  { "color": "green", "value": 0 },
+  { "color": "blue", "value": 0 }
+];
+const hslArr = [
+  { "color": "hue", "value": 0 },
+  { "color": "saturate", "value": 0 },
+  { "color": "lighten", "value": 0 }
+];
+const cmykArr = [
+  { "color": "cyan", "value": 0 },
+  { "color": "magenta", "value": 0 },
+  { "color": "yellow", "value": 0 },
+  { "color": "black", "value": 100 }
+];
 
-  // Array of Color Spaces
-  const rgbArr = [
-    { "color": "red", "value": 0 },
-    { "color": "green", "value": 0 },
-    { "color": "blue", "value": 0 }
-  ];
-  const hslArr = [
-    { "color": "hue", "value": 0 },
-    { "color": "saturate", "value": 0 },
-    { "color": "lighten", "value": 0 }
-  ];
-  const cmykArr = [
-    { "color": "cyan", "value": 0 },
-    { "color": "magenta", "value": 0 },
-    { "color": "yellow", "value": 0 },
-    { "color": "black", "value": 100 }
-  ];
+
+const Main = () => {
 
   // Variable for state management
   const [rgb, setRgb] = useState(rgbArr);
@@ -38,6 +40,7 @@ const Main = () => {
   const [cmyk, setCmyk] = useState(cmykArr);
   const [hex, setHex] = useState('#000000')
   const [greyScale, setGreyScale] = useState(false);
+  const [histogram, setHistogram] = useState(histoGram);
   const [tabs, setTabs] = useState(0);
 
 
@@ -59,7 +62,6 @@ const Main = () => {
     cmyk[1].value = cmykObject.m;
     cmyk[2].value = cmykObject.y;
     cmyk[3].value = cmykObject.k;
-
   };
 
   // For RGB Handle
@@ -147,24 +149,16 @@ const Main = () => {
   return (
     <main className={classes.root}>
       <Container>
-        <Grid container spacing={12} alignItems="center">
-          <Grid item xs className={classes.image}>
-            <Jimage
-              src={Image}
-              color={!greyScale ? [
-                { apply: "red", params: [rgb[0].value] },
-                { apply: "green", params: [rgb[1].value] },
-                { apply: "blue", params: [rgb[2].value] }
-              ] :
-                [{ apply: "desaturate", params: [100] },]
-              }
-            />
-          </Grid>
-          <Grid item xs>Red</Grid>
-          <Grid item xs>Green</Grid>
-          <Grid item xs>Blue</Grid>
-          <Grid item xs>Grayscale</Grid>
-        </Grid>
+        <Jimage
+          src={Image}
+          color={!greyScale ? [
+            { apply: "red", params: [rgb[0].value] },
+            { apply: "green", params: [rgb[1].value] },
+            { apply: "blue", params: [rgb[2].value] }
+          ] :
+            [{ apply: "desaturate", params: [100] },]
+          }
+        />
         <TypeGraph color={hex}>{hex}</TypeGraph>
         <FormControlLabel label="Greyscale" control={<Checkbox checked={greyScale} onChange={handleGreyScale} />} />
       </Container>
@@ -177,6 +171,7 @@ const Main = () => {
             <Tab label="RGB" />
             <Tab label="HSL" />
             <Tab label="CMYK" />
+            <Tab label="Histogram" />
           </Tabs>
         </Paper>
         {/* RGB */}
@@ -225,6 +220,16 @@ const Main = () => {
             </Grid>
           ))}
           <Button container variant="contained" onClick={() => setRgb(rgbArr)} color="default">Reset CMYK</Button>
+        </ColorContainer>
+        {/* Histogram */}
+        <ColorContainer display={tabs === 3 ? `block` : `none`}>
+          <Grid container spacing={2} alignItems="center">
+            {histoGram["red"]}
+            {Object.keys(histogram).map((value, index) => (
+              <Grid item xs>
+              </Grid>
+            ))}
+          </Grid>
         </ColorContainer>
       </Container>
     </main>
