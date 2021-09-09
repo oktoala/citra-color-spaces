@@ -56,16 +56,16 @@ export const Jimage = (props) => {
             setLoading(false);
             setImage(mime);
             await JIMP.read(mime, function (err, photo) {
-                histogramRGB(histoGram, photo);
+                console.log("Makan");
+                histogramRGB(photo);
             });
         }
-
 
         imgEffect();
         return () => setLoading(true);
     }, [src, options]);
 
-    function histogramRGB(channels, photo) {
+    function histogramRGB(photo) {
         const colourFrequencies = getColourFrequencies(photo);
 
         createHistogram(colourFrequencies);
@@ -113,8 +113,9 @@ export const Jimage = (props) => {
     }
 
     function createHistogram(colourFrequencies) {
-        const histWidth = 255;
+        const histWidth = 256;
         const histHeight = 316;
+
         const columnWidth = 1; /* Ini jadi bins */
 
         
@@ -143,8 +144,13 @@ export const Jimage = (props) => {
                     }
                     columnHeight = colourFrequencies[key].colourFrequencies[i] * pixelsPerUnit;
 
+                    
                     svgstring += `    <rect fill='${hexColour}' stroke='${hexColour}' stroke-width='0.25px' width='${columnWidth}' height='${columnHeight}' y='${histHeight - columnHeight}' x='${x}' />\n`;
-                    x += columnWidth;
+                    if (i % columnWidth === 0 && i !== 0){
+                        x+= columnWidth;
+                    } else if (columnWidth === 1){
+                        x+= columnWidth;
+                    }
                 }
                 svgstring += "</svg>";
             }
@@ -157,6 +163,8 @@ export const Jimage = (props) => {
             else if (colourFrequencies[key].index === 2) {
                 histoGram.blue = svgstring;
             }
+
+            console.log(histoGram.red);
         }
     }
 
@@ -167,4 +175,10 @@ export const Jimage = (props) => {
         height={height && height}
         style={loading && loadBlur ? { filter: 'blur(3px)' } : style}
     />)
+}
+
+export const Histogram = () => {
+    return (
+        <div dangerouslySetInnerHTML></div>
+    )
 }

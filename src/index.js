@@ -1,12 +1,10 @@
 import ReactDOM from 'react-dom';
 import Image from './img/unnamed.jpg';
-import { ReactComponent as HistRed } from './svg/histred.svg';
 import { Container, Slider, Grid, Typography, Paper, Tabs, Tab, Button, Checkbox, FormControlLabel } from '@material-ui/core';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import { React, useState, useEffect } from 'react';
 import { Jimage, histoGram } from './Jimage';
 import { rgbToHSL, hslToRgb, cmykToRgb, rgbToCmyk, rgbToHex, hslToCmyk, cmykToHsl } from './converter';
-import { red } from '@material-ui/core/colors';
 
 const App = () => {
   return (
@@ -39,6 +37,7 @@ const Main = () => {
   const [hsl, setHsl] = useState(hslArr);
   const [cmyk, setCmyk] = useState(cmykArr);
   const [hex, setHex] = useState('#000000')
+  const [grayscaleValue, setGrayscaleValue] = useState(100)
   const [greyScale, setGreyScale] = useState(false);
   const [histogram, setHistogram] = useState(histoGram);
   const [tabs, setTabs] = useState(0);
@@ -105,6 +104,11 @@ const Main = () => {
   }, // eslint-disable-next-line
     [cmyk]);
 
+  useEffect(() => {
+    setGrayscaleValue(99);
+
+  }, [greyScale])
+
   //* Function
   function handleRGB(event, newValue) {
     const index = event.currentTarget.id !== undefined ? event.currentTarget.id : event.target.ariaLabel;
@@ -136,14 +140,13 @@ const Main = () => {
   }
 
   function handleGreyScale(event, newValue) {
+    setHistogram(histoGram);
     setGreyScale(newValue);
   }
 
   function handleTabs(event, newValue) {
     setTabs(newValue);
   }
-
-
 
   const classes = useStyles();
   return (
@@ -155,8 +158,9 @@ const Main = () => {
             { apply: "red", params: [rgb[0].value] },
             { apply: "green", params: [rgb[1].value] },
             { apply: "blue", params: [rgb[2].value] }
-          ] :
-            [{ apply: "desaturate", params: [100] },]
+          ] : [
+            { apply: "greyscale", params: [grayscaleValue] }
+          ]
           }
         />
         <TypeGraph color={hex}>{hex}</TypeGraph>
@@ -226,7 +230,7 @@ const Main = () => {
           <Grid container spacing={2} alignItems="center">
             {Object.keys(histogram).map((value, index) => (
               <Grid item xs danger>
-                <div dangerouslySetInnerHTML={{__html: histoGram[value]}}></div>
+                <div dangerouslySetInnerHTML={{ __html: histogram[value] }}></div>
               </Grid>
             ))}
           </Grid>
