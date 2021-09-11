@@ -119,7 +119,7 @@ export const Jimage = (props) => {
     function createHistogram(colourFrequencies) {
         const histWidth = 256;
         const histHeight = 316;
-        const columnWidth = histHeight / className; /* Ini jadi bins */
+        const columnWidth = histWidth / className; /* Ini jadi bins */
 
         for (const key in colourFrequencies) {
             let hexColour;
@@ -133,7 +133,7 @@ export const Jimage = (props) => {
                 for (let i = 0; i < histWidth; i++) {
                     switch (colourFrequencies[key].index) {
                         case 0:
-                            hexColour = "red";
+                            hexColour = options.color.length === 3 ?"red" : "grey";
                             break;
                         case 1:
                             hexColour = "green";
@@ -179,11 +179,17 @@ export const Jimage = (props) => {
                     style={loading && loadBlur ? { filter: 'blur(3px)' } : style}
                 />
             </Grid>
-            {Object.keys(histogramValue).map((value, index) => (
-                <Grid item xs danger>
-                    <div dangerouslySetInnerHTML={{ __html: histogramValue[value] }}></div>
-                </Grid>
-            ))}
+            {
+                options.color.length === 3 ?
+                    Object.keys(histogramValue).map((value, index) => (
+                        <Grid item xs danger>
+                            <div dangerouslySetInnerHTML={{ __html: histogramValue[value] }}></div>
+                        </Grid>
+                    )) :
+                    <Grid item xs danger>
+                        <div dangerouslySetInnerHTML={{ __html: histogramValue["red"] }}></div>
+                    </Grid>
+            }
         </Grid>
     );
 }

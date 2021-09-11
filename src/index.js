@@ -150,9 +150,9 @@ const Main = () => {
       <Grid container>
         <Grid item xs>
           <Jimage
-            className={4}
+            className={256}
             src={Image}
-            color={!greyScale ? [
+            color={tabs !== 3 ? [
               { apply: "red", params: [rgb[0].value] },
               { apply: "green", params: [rgb[1].value] },
               { apply: "blue", params: [rgb[2].value] }
