@@ -1,19 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import JIMP from 'jimp';
+import { Grid } from '@material-ui/core';
 
-export const histoGram = {
-    red: "",
-    green: "",
-    blue: ""
-};
+
 
 export const Jimage = (props) => {
+    const histoGram = {
+        red: "",
+        green: "",
+        blue: ""
+    };
     const options = props;
 
     const { src, alt, width, height, style, className, loadBlur } = options;
 
+    console.log(options);
+
     const [image, setImage] = useState(src);
     const [loading, setLoading] = useState(true);
+    const [histogramValue, setHistogramValue] = useState(histoGram);
 
     useEffect(() => {
         async function imgEffect() {
@@ -56,15 +61,13 @@ export const Jimage = (props) => {
             setLoading(false);
             setImage(mime);
             await JIMP.read(mime, function (err, photo) {
-                console.log("Makan");
                 histogramRGB(photo);
             });
         }
-
         imgEffect();
         return () => setLoading(true);
     },// eslint-disable-next-line 
-    [ src, options]);
+        [src, options]);
 
     function histogramRGB(photo) {
         const colourFrequencies = getColourFrequencies(photo);
@@ -116,10 +119,8 @@ export const Jimage = (props) => {
     function createHistogram(colourFrequencies) {
         const histWidth = 256;
         const histHeight = 316;
+        const columnWidth = histHeight / className; /* Ini jadi bins */
 
-        const columnWidth = 1; /* Ini jadi bins */
-
-        
         for (const key in colourFrequencies) {
             let hexColour;
             let x = 0;
@@ -144,13 +145,11 @@ export const Jimage = (props) => {
                             break;
                     }
                     columnHeight = colourFrequencies[key].colourFrequencies[i] * pixelsPerUnit;
-
-                    
                     svgstring += `    <rect fill='${hexColour}' stroke='${hexColour}' stroke-width='0.25px' width='${columnWidth}' height='${columnHeight}' y='${histHeight - columnHeight}' x='${x}' />\n`;
-                    if (i % columnWidth === 0 && i !== 0){
-                        x+= columnWidth;
-                    } else if (columnWidth === 1){
-                        x+= columnWidth;
+                    if (i % columnWidth === 0 && i !== 0) {
+                        x += columnWidth;
+                    } else if (columnWidth === 1) {
+                        x += columnWidth;
                     }
                 }
                 svgstring += "</svg>";
@@ -164,22 +163,27 @@ export const Jimage = (props) => {
             else if (colourFrequencies[key].index === 2) {
                 histoGram.blue = svgstring;
             }
-
-            console.log(histoGram.red);
         }
+        setHistogramValue(histoGram);
+
     }
 
-    return (<img
-        className={className && className}
-        alt={alt && alt}
-        src={image} width={width && width}
-        height={height && height}
-        style={loading && loadBlur ? { filter: 'blur(3px)' } : style}
-    />)
-}
-
-export const Histogram = () => {
     return (
-        <div dangerouslySetInnerHTML></div>
-    )
+        <Grid container>
+            <Grid item xs>
+                <img
+                    className={className && className}
+                    alt={alt && alt}
+                    src={image} width={width && width}
+                    height={height && height}
+                    style={loading && loadBlur ? { filter: 'blur(3px)' } : style}
+                />
+            </Grid>
+            {Object.keys(histogramValue).map((value, index) => (
+                <Grid item xs danger>
+                    <div dangerouslySetInnerHTML={{ __html: histogramValue[value] }}></div>
+                </Grid>
+            ))}
+        </Grid>
+    );
 }

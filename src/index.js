@@ -1,9 +1,9 @@
 import ReactDOM from 'react-dom';
 import Image from './img/unnamed.jpg';
-import { Container, Slider, Grid, Typography, Paper, Tabs, Tab, Button, Checkbox, FormControlLabel } from '@material-ui/core';
+import { Container, Slider, Grid, Typography, Paper, Tabs, Tab, Button} from '@material-ui/core';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import { React, useState, useEffect } from 'react';
-import { Jimage, histoGram } from './Jimage';
+import { Jimage } from './Jimage';
 import { rgbToHSL, hslToRgb, cmykToRgb, rgbToCmyk, rgbToHex, hslToCmyk, cmykToHsl } from './converter';
 
 const App = () => {
@@ -36,9 +36,9 @@ const Main = () => {
   const [rgb, setRgb] = useState(rgbArr);
   const [hsl, setHsl] = useState(hslArr);
   const [cmyk, setCmyk] = useState(cmykArr);
-  const [hex, setHex] = useState('#000000')
+  const [grayscaleValue, setGrayscaleValue] = useState(50);
+  const [hex, setHex] = useState('#000000');
   const [greyScale, setGreyScale] = useState(false);
-  const [histogram, setHistogram] = useState(histoGram);
   const [tabs, setTabs] = useState(0);
 
 
@@ -103,6 +103,10 @@ const Main = () => {
   }, // eslint-disable-next-line
     [cmyk]);
 
+  useEffect(() => {
+    console.log('Grey');
+  }, [grayscaleValue]);
+
   //* Function
   function handleRGB(event, newValue) {
     const index = event.currentTarget.id !== undefined ? event.currentTarget.id : event.target.ariaLabel;
@@ -130,11 +134,9 @@ const Main = () => {
       { "color": "yellow", "value": index === "cmyk[2]" ? newValue : cmyk[2].value },
       { "color": "black", "value": index === "cmyk[3]" ? newValue : cmyk[3].value }
     ]);
-
   }
 
   function handleGreyScale(event, newValue) {
-    setHistogram(histoGram);
     setGreyScale(newValue);
   }
 
@@ -145,21 +147,23 @@ const Main = () => {
   const classes = useStyles();
   return (
     <main className={classes.root}>
-      <Container>
-        <Jimage
-          src={Image}
-          color={!greyScale ? [
-            { apply: "red", params: [rgb[0].value] },
-            { apply: "green", params: [rgb[1].value] },
-            { apply: "blue", params: [rgb[2].value] }
-          ] : [
-            { apply: "greyscale", params: [100] }
-          ]
-          }
-        />
-        <TypeGraph color={hex}>{hex}</TypeGraph>
-        <FormControlLabel label="Greyscale" control={<Checkbox checked={greyScale} onChange={handleGreyScale} />} />
-      </Container>
+      <Grid container>
+        <Grid item xs>
+          <Jimage
+            className={4}
+            src={Image}
+            color={!greyScale ? [
+              { apply: "red", params: [rgb[0].value] },
+              { apply: "green", params: [rgb[1].value] },
+              { apply: "blue", params: [rgb[2].value] }
+            ] : [
+              { apply: "desaturate", params: [grayscaleValue] }
+            ]
+            }
+          />
+          <TypeGraph color={hex}>{hex}</TypeGraph>
+        </Grid>
+      </Grid>
       <Container >
         <Paper square>
           <Tabs
@@ -169,7 +173,7 @@ const Main = () => {
             <Tab label="RGB" />
             <Tab label="HSL" />
             <Tab label="CMYK" />
-            <Tab label="Histogram" />
+            <Tab label="Greyscale" />
           </Tabs>
         </Paper>
         {/* RGB */}
@@ -219,14 +223,9 @@ const Main = () => {
           ))}
           <Button container variant="contained" onClick={() => setRgb(rgbArr)} color="default">Reset CMYK</Button>
         </ColorContainer>
-        {/* Histogram */}
+        {/* Greyscale */}
         <ColorContainer display={tabs === 3 ? `block` : `none`}>
           <Grid container spacing={2} alignItems="center">
-            {Object.keys(histogram).map((value, index) => (
-              <Grid item xs danger>
-                <div dangerouslySetInnerHTML={{ __html: histogram[value] }}></div>
-              </Grid>
-            ))}
           </Grid>
         </ColorContainer>
       </Container>
