@@ -37,7 +37,6 @@ const Main = () => {
   const [hsl, setHsl] = useState(hslArr);
   const [cmyk, setCmyk] = useState(cmykArr);
   const [hex, setHex] = useState('#000000')
-  const [grayscaleValue, setGrayscaleValue] = useState(100)
   const [greyScale, setGreyScale] = useState(false);
   const [histogram, setHistogram] = useState(histoGram);
   const [tabs, setTabs] = useState(0);
@@ -104,11 +103,6 @@ const Main = () => {
   }, // eslint-disable-next-line
     [cmyk]);
 
-  useEffect(() => {
-    setGrayscaleValue(99);
-
-  }, [greyScale])
-
   //* Function
   function handleRGB(event, newValue) {
     const index = event.currentTarget.id !== undefined ? event.currentTarget.id : event.target.ariaLabel;
@@ -159,7 +153,7 @@ const Main = () => {
             { apply: "green", params: [rgb[1].value] },
             { apply: "blue", params: [rgb[2].value] }
           ] : [
-            { apply: "greyscale", params: [grayscaleValue] }
+            { apply: "greyscale", params: [100] }
           ]
           }
         />

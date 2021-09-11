@@ -63,7 +63,8 @@ export const Jimage = (props) => {
 
         imgEffect();
         return () => setLoading(true);
-    }, [src, options]);
+    },// eslint-disable-next-line 
+    [ src, options]);
 
     function histogramRGB(photo) {
         const colourFrequencies = getColourFrequencies(photo);
