@@ -8,7 +8,7 @@ import { rgbToHSL, hslToRgb, cmykToRgb, rgbToCmyk, rgbToHex, hslToCmyk, cmykToHs
 
 const App = () => {
   return (
-    <Main></Main>
+    <Main/>
   );
 }
 // Array of Color Spaces
