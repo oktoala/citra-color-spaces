@@ -14,8 +14,6 @@ export const Jimage = (props) => {
 
     const { src, alt, width, height, style, className, loadBlur } = options;
 
-    console.log(options);
-
     const [image, setImage] = useState(src);
     const [loading, setLoading] = useState(true);
     const [histogramValue, setHistogramValue] = useState(histoGram);

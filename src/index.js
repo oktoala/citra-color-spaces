@@ -1,6 +1,6 @@
 import ReactDOM from 'react-dom';
 import Image from './img/unnamed.jpg';
-import { Container, Slider, Grid, Typography, Paper, Tabs, Tab, Button} from '@material-ui/core';
+import { Container, Slider, Grid, Typography, Paper, Tabs, Tab, Button, RadioGroup, FormControlLabel, Radio } from '@material-ui/core';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import { React, useState, useEffect } from 'react';
 import { Jimage } from './Jimage';
@@ -36,10 +36,10 @@ const Main = () => {
   const [rgb, setRgb] = useState(rgbArr);
   const [hsl, setHsl] = useState(hslArr);
   const [cmyk, setCmyk] = useState(cmykArr);
-  const [grayscaleValue, setGrayscaleValue] = useState(50);
+  const [greyscale, setGreyscale] = useState(100);
   const [hex, setHex] = useState('#000000');
-  const [greyScale, setGreyScale] = useState(false);
   const [tabs, setTabs] = useState(0);
+  const [bin, setBin] = useState(256);
 
 
   // Function to control state
@@ -103,10 +103,6 @@ const Main = () => {
   }, // eslint-disable-next-line
     [cmyk]);
 
-  useEffect(() => {
-    console.log('Grey');
-  }, [grayscaleValue]);
-
   //* Function
   function handleRGB(event, newValue) {
     const index = event.currentTarget.id !== undefined ? event.currentTarget.id : event.target.ariaLabel;
@@ -137,7 +133,7 @@ const Main = () => {
   }
 
   function handleGreyScale(event, newValue) {
-    setGreyScale(newValue);
+    setGreyscale(newValue);
   }
 
   function handleTabs(event, newValue) {
@@ -147,22 +143,36 @@ const Main = () => {
   const classes = useStyles();
   return (
     <main className={classes.root}>
+      <Jimage
+        className={bin}
+        src={Image}
+        color={tabs !== 3 ? [
+          { apply: "red", params: [rgb[0].value] },
+          { apply: "green", params: [rgb[1].value] },
+          { apply: "blue", params: [rgb[2].value] }
+        ] : [
+          { apply: "desaturate", params: [greyscale] }
+        ]
+        }
+      />
       <Grid container>
         <Grid item xs>
-          <Jimage
-            className={256}
-            src={Image}
-            color={tabs !== 3 ? [
-              { apply: "red", params: [rgb[0].value] },
-              { apply: "green", params: [rgb[1].value] },
-              { apply: "blue", params: [rgb[2].value] }
-            ] : [
-              { apply: "desaturate", params: [grayscaleValue] }
-            ]
-            }
-          />
           <TypeGraph color={hex}>{hex}</TypeGraph>
         </Grid>
+        <RadioGroup row name="bin" value={bin} onChange={(event) => setBin(event.target.value)}>
+          <Grid item xs>
+            <FormControlLabel value="256" control={<Radio />} label="256" />
+          </Grid>
+          <Grid item xs>
+            <FormControlLabel value="64" control={<Radio />} label="64" />
+          </Grid>
+          <Grid item xs>
+            <FormControlLabel value="16" control={<Radio />} label="16" />
+          </Grid>
+          <Grid item xs>
+            <FormControlLabel value="4" control={<Radio />} label="4" />
+          </Grid>
+        </RadioGroup>
       </Grid>
       <Container >
         <Paper square>
@@ -181,7 +191,7 @@ const Main = () => {
           {rgb.map((v, index) => (
             <Grid container spacing={2} alignItems="center">
               <Grid item xs>
-                <PrettoSlider disabled={greyScale} id={`rgb[${index}]`} value={v.value} aria-label={`rgb[${index}]`} color={v.color} max={255}
+                <PrettoSlider id={`rgb[${index}]`} value={v.value} aria-label={`rgb[${index}]`} color={v.color} max={255}
                   valueLabelDisplay="auto" defaultValue={0} onChange={handleRGB} />
               </Grid>
               <Grid item xs>
@@ -196,7 +206,7 @@ const Main = () => {
           {hsl.map((v, index) => (
             <Grid container spacing={2} alignItems="center">
               <Grid item xs>
-                <PrettoSlider disabled={greyScale} id={`hsl[${index}]`} aria-label={`hsl[${index}]`}
+                <PrettoSlider id={`hsl[${index}]`} aria-label={`hsl[${index}]`}
                   color="black" max={v.color === "hue" ? 360 : 100} value={v.value} valueLabelDisplay="auto"
                   onChange={handleHSL}
                   background={v.color === "hue" ? 'linear-gradient(to right, red, yellow, green, cyan, blue, magenta, red)' : 'black'} />
@@ -206,14 +216,14 @@ const Main = () => {
               </Grid>
             </Grid>
           ))}
-          <Button container variant="contained" onClick={() => setRgb(rgbArr)} color="default">Reset HSL</Button>
+          <Button container variant="contained" onClick={() => setHsl(hslArr)} color="default">Reset HSL</Button>
         </ColorContainer>
         {/* CMYK */}
         <ColorContainer display={tabs === 2 ? `block` : `none`}>
           {cmyk.map((v, index) => (
             <Grid container spacing={2} alignItems="center">
               <Grid item xs>
-                <PrettoSlider disabled={greyScale} id={`cmyk[${index}]`} aria-label={`cmyk[${index}]`} color={v.color} max={100}
+                <PrettoSlider id={`cmyk[${index}]`} aria-label={`cmyk[${index}]`} color={v.color} max={100}
                   value={v.value} valueLabelDisplay="auto" onChange={handleCMYK} />
               </Grid>
               <Grid item xs>
@@ -221,11 +231,17 @@ const Main = () => {
               </Grid>
             </Grid>
           ))}
-          <Button container variant="contained" onClick={() => setRgb(rgbArr)} color="default">Reset CMYK</Button>
+          <Button container variant="contained" onClick={() => setCmyk(cmykArr)} color="default">Reset CMYK</Button>
         </ColorContainer>
         {/* Greyscale */}
         <ColorContainer display={tabs === 3 ? `block` : `none`}>
           <Grid container spacing={2} alignItems="center">
+            <Grid item xs>
+              <PrettoSlider color="grey" max={100} valueLabelDisplay="auto" onChange={handleGreyScale} value={greyscale}></PrettoSlider>
+            </Grid>
+            <Grid item xs>
+              <Typography>{greyscale}</Typography>
+            </Grid>
           </Grid>
         </ColorContainer>
       </Container>
